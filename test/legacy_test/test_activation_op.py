@@ -4513,7 +4513,10 @@ class TestSquare_ZeroDim(TestSquare):
 
 class TestSquare_ZeroSize(TestSquare):
     def init_shape(self):
-        self.shape = [0, 1, 1]  # 0-size tensor
+        self.shape = [0, 1, 1]
+
+    def init_dtype(self):
+        self.dtype = np.float32
 
 
 @unittest.skipIf(
