@@ -531,7 +531,7 @@ def pow(x: Tensor, y: float | Tensor, name: str | None = None) -> Tensor:
 
 
     Args:
-        x (Tensor): An N-D Tensor, the data type is bfloat16, float16, float32, float64, int32 or int64.
+        x (Tensor): An N-D Tensor, the data type is bfloat16, float16, float32, float64, int32, int64, complex64 or complex128.
         y (float|int|Tensor): If it is an N-D Tensor, its data type should be the same as `x`.
         name (str|None, optional): Name for the operation (optional, default is None). For more information, please refer to :ref:`api_guide_Name`.
 
@@ -638,6 +638,7 @@ def _elementwise_op(helper):
         "elementwise_mul",
         "elementwise_div",
         "elementwise_max",
+        "elementwise_pow",
     ]
     if original_op_type in bf16_and_complex_supported_ops:
         data_type = [
@@ -4280,7 +4281,7 @@ def cumsum(
     Args:
         x (Tensor): The input tensor needed to be cumsumed.
         axis (int, optional): The dimension to accumulate along. -1 means the last dimension. The default (None) is to compute the cumsum over the flattened array.
-        dtype (str|paddle.dtype|np.dtype|None, optional): The data type of the output tensor, can be bfloat16, float16, float32, float64, int32, int64. If specified, the input tensor is casted to dtype before the operation is performed. This is useful for preventing data type overflows. The default value is None.
+        dtype (str|paddle.dtype|np.dtype|None, optional): The data type of the output tensor, can be bfloat16, float16, float32, float64, int32, int64, complex64, complex128. If specified, the input tensor is casted to dtype before the operation is performed. This is useful for preventing data type overflows. The default value is None.
         name (str|None, optional): Name for the operation (optional, default is None). For more information, please refer to :ref:`api_guide_Name`.
 
     Returns:
@@ -4331,7 +4332,16 @@ def cumsum(
         check_variable_and_dtype(
             x,
             'x',
-            ['float16', 'uint16', 'float32', 'float64', 'int32', 'int64'],
+            [
+                'float16',
+                'uint16',
+                'float32',
+                'float64',
+                'int32',
+                'int64',
+                'complex64',
+                'complex128',
+            ],
             'cumsum',
         )
         check_type(x, 'x', (Variable), 'cumsum')
@@ -6936,13 +6946,15 @@ def frac(x: Tensor, name: str | None = None) -> Tensor:
         paddle.int64,
         paddle.float32,
         paddle.float64,
+        paddle.float16,
         DataType.INT32,
         DataType.INT64,
         DataType.FLOAT32,
         DataType.FLOAT64,
+        DataType.FLOAT16,
     ]:
         raise TypeError(
-            f"The data type of input must be one of ['int32', 'int64', 'float32', 'float64'], but got {x.dtype}"
+            f"The data type of input must be one of ['int32', 'int64', 'float32', 'float64', 'float16'], but got {x.dtype}"
         )
     if in_dynamic_or_pir_mode():
         y = _C_ops.trunc(x)
@@ -6953,7 +6965,7 @@ def frac(x: Tensor, name: str | None = None) -> Tensor:
 
         helper = LayerHelper("trunc", **locals())
         check_variable_and_dtype(
-            x, "X", ['int32', 'int64', 'float32', 'float64'], 'trunc'
+            x, "X", ['int32', 'int64', 'float32', 'float64', 'float16'], 'trunc'
         )
         y = helper.create_variable_for_type_inference(dtype=x.dtype)
         helper.append_op(
@@ -6974,9 +6986,10 @@ def frac_(x: Tensor, name: str | None = None) -> Tensor:
         paddle.int64,
         paddle.float32,
         paddle.float64,
+        paddle.float16,
     ]:
         raise TypeError(
-            f"The data type of input must be one of ['int32', 'int64', 'float32', 'float64'], but got {x.dtype}"
+            f"The data type of input must be one of ['int32', 'int64', 'float32', 'float64', 'float16'], but got {x.dtype}"
         )
     if in_dynamic_mode():
         y = _C_ops.trunc(x)
