@@ -2900,9 +2900,7 @@ def inner(x: Tensor, y: Tensor, name: str | None = None) -> Tensor:
         __check_input(nx, ny)
 
         if in_dynamic_or_pir_mode():
-            return _C_ops.matmul(
-                nx, paddle.transpose(ny, [1, 0]), False, False
-            ).reshape(dstshape)
+            return _C_ops.matmul(nx, ny, False, True).reshape(dstshape)
         else:
             helper = LayerHelper('inner', **locals())
             out = helper.create_variable_for_type_inference(dtype=nx.dtype)
@@ -7902,8 +7900,8 @@ def ldexp(x: Tensor, y: Tensor, name: str | None = None) -> Tensor:
         out_dtype = DataType.FLOAT64
     else:
         out_dtype = paddle.get_default_dtype()
-    x = paddle.cast(x, dtype=out_dtype)
-    y = paddle.cast(y, dtype=out_dtype)
+    x = x.astype(dtype=out_dtype)
+    y = y.astype(dtype=out_dtype)
     two = paddle.to_tensor(2, dtype=out_dtype)
     return paddle.multiply(x, paddle.pow(two, y))
 
